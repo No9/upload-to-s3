@@ -17,6 +17,7 @@ struct RequestData {
     bucket: String,
     key: String,
     region: String,
+    domain: String,
 }
 
 fn main() -> ExitCode {
