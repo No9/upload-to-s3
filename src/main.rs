@@ -55,6 +55,7 @@ fn try_main() -> Result<(), Box<dyn Error>> {
 struct Args {
     bucket: String,
     region: String,
+    domain: String,
     local_filename: PathBuf,
     object_name: String,
 }
@@ -66,6 +67,7 @@ fn parse_args() -> Result<Args, getopts::Fail> {
     let mut opts = Options::new();
     opts.optopt("b", "bucket", "S3 bucket", "NAME");
     opts.optopt("r", "region", "S3 region (default: us-east-1)", "REGION");
+    opts.optopt("d", "domain", "S3 domain (default: amazonaws.com)", "DOMAIN");
     opts.optflag("h", "help", "Print this help information");
     let matches = opts.parse(&args[1..])?;
 
@@ -75,12 +77,16 @@ fn parse_args() -> Result<Args, getopts::Fail> {
     let region = matches
         .opt_str("r")
         .unwrap_or_else(|| "us-east-1".to_string());
+    let domain = matches
+        .opt_str("d")
+        .unwrap_or_else(|| "amazonaws.com".to_string());
 
     let local_filename = matches.free.get(0).unwrap_or_else(|| usage(program, &opts));
     let object_name = matches.free.get(1).unwrap_or_else(|| usage(program, &opts));
     Ok(Args {
         bucket,
         region,
+        domain,
         local_filename: PathBuf::from(local_filename),
         object_name: object_name.to_string(),
     })
@@ -102,8 +108,8 @@ fn upload_object(
     // )
     // .parse()?;
     let url: Url = format!(
-        "https://s3.{}.amazonaws.com/{}/{}",
-        req_data.region, req_data.bucket, req_data.key
+        "https://s3.{}.{}/{}/{}",
+        req_data.region, req_data.domain, req_data.bucket, req_data.key
     )
     .parse()?;
     let signature = s3v4::signature(
