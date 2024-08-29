@@ -43,6 +43,7 @@ fn try_main() -> Result<(), Box<dyn Error>> {
         access: aws_access_key_id,
         secret: aws_secret_access_key,
         bucket: args.bucket,
+        domain: args.domain,
         key: args.object_name.clone(),
         region: args.region,
     };
